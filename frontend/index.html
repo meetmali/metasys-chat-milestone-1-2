@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Metasys API Assistant</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0d0d0d;
+      --surface:      #141414;
+      --surface-2:    #1a1a1a;
+      --border:       #252525;
+      --border-focus: #2e4a66;
+      --text:         #d8d8d8;
+      --text-dim:     #888;
+      --text-muted:   #444;
+      --accent:       #3b82f6;
+      --accent-hover: #2563eb;
+      --user-bg:      #0f2236;
+      --user-border:  #1a3a55;
+      --green:        #22c55e;
+      --sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Header                                                               */
+    /* ------------------------------------------------------------------ */
+    header {
+      flex-shrink: 0;
+      padding: 0 20px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-wordmark {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+
+    /* Mode toggle */
+    .mode-toggle {
+      display: flex;
+      align-items: center;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .mode-btn {
+      font-family: var(--sans);
+      font-size: 11px;
+      padding: 4px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--text-dim);
+      background: transparent;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .mode-btn:not(.active):hover {
+      color: var(--text);
+      background: var(--border);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: background 0.3s;
+    }
+    .status-dot.ready { background: var(--green); }
+    .status-dot.busy  { background: #f59e0b; }
+    .status-dot.error { background: #ef4444; }
+
+    .status-label {
+      font-size: 10px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+    }
+
+    .btn-outline {
+      font-family: var(--sans);
+      font-size: 11px;
+      padding: 5px 11px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .btn-outline:hover    { border-color: var(--accent); color: var(--accent); }
+    .btn-outline:disabled { opacity: 0.35; cursor: default; }
+
+    /* ------------------------------------------------------------------ */
+    /* Mode banner                                                          */
+    /* ------------------------------------------------------------------ */
+    .mode-banner {
+      flex-shrink: 0;
+      padding: 6px 20px;
+      font-size: 11px;
+      font-family: var(--mono);
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mode-banner .mode-pill {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .mode-banner .mode-pill.docs   { background: #1e3a55; color: #60a5fa; }
+    .mode-banner .mode-pill.spaces { background: #1a3320; color: #4ade80; }
+
+    /* ------------------------------------------------------------------ */
+    /* Messages                                                             */
+    /* ------------------------------------------------------------------ */
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .messages::-webkit-scrollbar       { width: 3px; }
+    .messages::-webkit-scrollbar-track { background: transparent; }
+    .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* Empty state */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding-bottom: 60px;
+    }
+
+    .empty-state h1 {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .empty-state p {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .suggestions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 18px;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .suggestion {
+      font-family: var(--sans);
+      font-size: 12px;
+      text-align: left;
+      padding: 9px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .suggestion:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Message rows */
+    .message {
+      display: flex;
+      flex-direction: column;
+      max-width: 800px;
+      width: 100%;
+    }
+    .message.user      { align-self: flex-end;   align-items: flex-end; }
+    .message.assistant { align-self: flex-start; align-items: flex-start; }
+
+    .message-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+      padding: 0 3px;
+    }
+
+    .bubble {
+      padding: 11px 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.75;
+      word-break: break-word;
+    }
+
+    .message.user .bubble {
+      background: var(--user-bg);
+      border: 1px solid var(--user-border);
+      border-radius: 10px 2px 10px 10px;
+    }
+
+    .message.assistant .bubble {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2px 10px 10px 10px;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      white-space: pre-wrap;
+    }
+
+    .message.assistant .bubble.streaming::after {
+      content: "_";
+      animation: blink 1s step-end infinite;
+      color: var(--accent);
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Input area                                                           */
+    /* ------------------------------------------------------------------ */
+    .input-area {
+      flex-shrink: 0;
+      padding: 12px 20px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .input-wrap {
+      flex: 1;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 13px;
+      transition: border-color 0.15s;
+    }
+    .input-wrap:focus-within { border-color: var(--border-focus); }
+
+    textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--sans);
+      line-height: 1.5;
+      resize: none;
+      min-height: 20px;
+      max-height: 120px;
+    }
+    textarea::placeholder { color: var(--text-muted); }
+
+    .send-btn {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      background: var(--accent);
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .send-btn:hover   { background: var(--accent-hover); }
+    .send-btn:active  { transform: scale(0.93); }
+    .send-btn:disabled { background: var(--border); cursor: default; }
+    .send-btn svg { width: 15px; height: 15px; fill: white; }
+
+    .footer-note {
+      font-size: 10px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 7px;
+    }
+    .footer-note.err { color: #ef4444; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <span class="header-wordmark">Metasys Assistant</span>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="btn-docs"   onclick="setMode('docs')">API Docs</button>
+        <button class="mode-btn"        id="btn-spaces" onclick="setMode('spaces')">Spaces</button>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status-group">
+        <div class="status-dot" id="status-dot"></div>
+        <span class="status-label" id="status-label"></span>
+      </div>
+      <button class="btn-outline" id="ingest-btn" onclick="triggerIngest()">Re-ingest</button>
+    </div>
+  </header>
+
+  <div class="mode-banner" id="mode-banner">
+    <span class="mode-pill docs" id="mode-pill">API DOCS</span>
+    <span id="mode-desc">Ask questions about the Metasys REST API endpoints and parameters.</span>
+  </div>
+
+  <div class="messages" id="messages">
+    <div class="empty-state" id="empty-state">
+      <h1 id="empty-title">Metasys REST API Assistant</h1>
+      <p id="empty-sub">Ask anything about the Metasys REST API endpoints, parameters, and responses.</p>
+      <div class="suggestions" id="suggestions">
+        <button class="suggestion" onclick="ask('What endpoints are available for working with spaces?')">What endpoints are available for working with spaces?</button>
+        <button class="suggestion" onclick="ask('How do I authenticate with the Metasys REST API?')">How do I authenticate with the Metasys REST API?</button>
+        <button class="suggestion" onclick="ask('What query parameters does GET /objects support?')">What query parameters does GET /objects support?</button>
+        <button class="suggestion" onclick="ask('How does pagination work in the Metasys API?')">How does pagination work in the Metasys API?</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <div class="input-row">
+      <div class="input-wrap">
+        <textarea
+          id="input"
+          placeholder="Ask a question..."
+          rows="1"
+          onkeydown="handleKey(event)"
+          oninput="autoResize(this)"
+        ></textarea>
+      </div>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()" title="Send">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="footer-note" id="footer-note">metasys-chat &mdash; all inference is local</div>
+  </div>
+
+  <script>
+    // ------------------------------------------------------------------ //
+    // State                                                                //
+    // ------------------------------------------------------------------ //
+    let mode      = "docs";   // "docs" | "spaces"
+    let streaming = false;
+
+    const MODES = {
+      docs: {
+        chatEndpoint:   "/chat",
+        ingestEndpoint: "/ingest",
+        pill:           "API DOCS",
+        pillClass:      "docs",
+        desc:           "Ask questions about the Metasys REST API endpoints and parameters.",
+        emptyTitle:     "Metasys REST API Assistant",
+        emptySub:       "Ask anything about the Metasys REST API endpoints, parameters, and responses.",
+        placeholder:    "Ask about the Metasys REST API...",
+        suggestions: [
+          "What endpoints are available for working with spaces?",
+          "How do I authenticate with the Metasys REST API?",
+          "What query parameters does GET /objects support?",
+          "How does pagination work in the Metasys API?",
+        ],
+      },
+      spaces: {
+        chatEndpoint:   "/chat/spaces",
+        ingestEndpoint: "/ingest/spaces",
+        pill:           "SPACES",
+        pillClass:      "spaces",
+        desc:           "Ask questions about the live building spaces data from MRAM.",
+        emptyTitle:     "Building Spaces Assistant",
+        emptySub:       "Ask about rooms, buildings, areas, and equipment in the building.",
+        placeholder:    "Ask about building spaces...",
+        suggestions: [
+          "What rooms are larger than 300 square meters?",
+          "What buildings have a bedroom?",
+          "List all buildings in the system.",
+          "What equipment is in the Kitchen?",
+        ],
+      },
+    };
+
+    // ------------------------------------------------------------------ //
+    // Mode switching                                                       //
+    // ------------------------------------------------------------------ //
+    function setMode(newMode) {
+      mode = newMode;
+      const cfg = MODES[mode];
+
+      document.getElementById("btn-docs").classList.toggle("active",   mode === "docs");
+      document.getElementById("btn-spaces").classList.toggle("active", mode === "spaces");
+
+      const pill = document.getElementById("mode-pill");
+      pill.textContent = cfg.pill;
+      pill.className   = "mode-pill " + cfg.pillClass;
+      document.getElementById("mode-desc").textContent = cfg.desc;
+      document.getElementById("input").placeholder     = cfg.placeholder;
+
+      // Clear messages and reset empty state
+      const wrap = document.getElementById("messages");
+      wrap.innerHTML = "";
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.id = "empty-state";
+      empty.innerHTML =
+        `<h1>${cfg.emptyTitle}</h1>` +
+        `<p>${cfg.emptySub}</p>` +
+        `<div class="suggestions" id="suggestions">` +
+        cfg.suggestions.map(s =>
+          `<button class="suggestion" onclick="ask('${s.replace(/'/g, "\\'")}')">${s}</button>`
+        ).join("") +
+        `</div>`;
+      wrap.appendChild(empty);
+
+      checkHealth();
+    }
+
+    // ------------------------------------------------------------------ //
+    // Utilities                                                            //
+    // ------------------------------------------------------------------ //
+    function autoResize(el) {
+      el.style.height = "auto";
+      el.style.height = Math.min(el.scrollHeight, 120) + "px";
+    }
+
+    function handleKey(e) {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    }
+
+    function ask(text) {
+      document.getElementById("input").value = text;
+      sendMessage();
+    }
+
+    function setStatus(state, label) {
+      document.getElementById("status-dot").className = "status-dot" + (state ? " " + state : "");
+      document.getElementById("status-label").textContent = label || "";
+    }
+
+    function setNote(text, isErr = false) {
+      const el = document.getElementById("footer-note");
+      el.textContent = text;
+      el.className   = "footer-note" + (isErr ? " err" : "");
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+
+    // ------------------------------------------------------------------ //
+    // Message rendering                                                    //
+    // ------------------------------------------------------------------ //
+    function addMessage(role, text = "") {
+      const emptyState = document.getElementById("empty-state");
+      if (emptyState) emptyState.remove();
+
+      const wrap = document.getElementById("messages");
+      const div  = document.createElement("div");
+      div.className = "message " + role;
+      div.innerHTML =
+        `<div class="message-label">${role === "user" ? "You" : "Assistant"}</div>` +
+        `<div class="bubble${role === "assistant" ? " streaming" : ""}">${escHtml(text)}</div>`;
+      wrap.appendChild(div);
+      wrap.scrollTop = wrap.scrollHeight;
+      return div.querySelector(".bubble");
+    }
+
+    function scrollBottom() {
+      const wrap = document.getElementById("messages");
+      wrap.scrollTop = wrap.scrollHeight;
+    }
+
+    // ------------------------------------------------------------------ //
+    // Send message                                                         //
+    // ------------------------------------------------------------------ //
+    async function sendMessage() {
+      if (streaming) return;
+      const input   = document.getElementById("input");
+      const message = input.value.trim();
+      if (!message) return;
+
+      input.value = "";
+      input.style.height = "auto";
+      streaming = true;
+      document.getElementById("send-btn").disabled = true;
+      setStatus("busy", "generating");
+      setNote("generating...");
+
+      addMessage("user", message);
+      const bubble = addMessage("assistant");
+
+      try {
+        const res = await fetch(MODES[mode].chatEndpoint, {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ message }),
+        });
+
+        if (!res.ok) {
+          bubble.classList.remove("streaming");
+          bubble.textContent = "Server error " + res.status;
+          setStatus("error", "error");
+          setNote("request failed", true);
+          return;
+        }
+
+        const reader  = res.body.getReader();
+        const decoder = new TextDecoder();
+        let   buffer  = "";
+        let   full    = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop();
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const raw = line.slice(6);
+            if (raw === "[DONE]") continue;
+            try {
+              full += JSON.parse(raw);
+              bubble.textContent = full;
+              scrollBottom();
+            } catch (_) {}
+          }
+        }
+
+        bubble.classList.remove("streaming");
+        setStatus("ready", "ready");
+        setNote("metasys-chat \u2014 all inference is local");
+
+      } catch (err) {
+        bubble.classList.remove("streaming");
+        bubble.textContent = "Connection error. Is the server running?";
+        setStatus("error", "error");
+        setNote("connection error", true);
+      } finally {
+        document.getElementById("send-btn").disabled = false;
+        streaming = false;
+      }
+    }
+
+    // ------------------------------------------------------------------ //
+    // Ingest trigger                                                       //
+    // ------------------------------------------------------------------ //
+    async function triggerIngest() {
+      const btn = document.getElementById("ingest-btn");
+      btn.disabled    = true;
+      btn.textContent = "Ingesting...";
+      setStatus("busy", "ingesting");
+      setNote("running ingestion...");
+
+      try {
+        const res  = await fetch(MODES[mode].ingestEndpoint, { method: "POST" });
+        const data = await res.json();
+        if (res.ok) {
+          setStatus("ready", "ready");
+          setNote(data.message || "Ingestion complete");
+        } else {
+          setStatus("error", "error");
+          setNote(data.detail || "Ingestion failed", true);
+        }
+      } catch (_) {
+        setStatus("error", "error");
+        setNote("Ingestion failed -- server not reachable", true);
+      } finally {
+        btn.disabled    = false;
+        btn.textContent = "Re-ingest";
+      }
+    }
+
+    // ------------------------------------------------------------------ //
+    // Health check                                                         //
+    // ------------------------------------------------------------------ //
+    async function checkHealth() {
+      try {
+        const res  = await fetch("/health");
+        const data = await res.json();
+        const ready = mode === "docs" ? data.api_docs_ready : data.spaces_ready;
+        if (ready) {
+          setStatus("ready", "ready");
+        } else {
+          setStatus("error", "not ready");
+          const cmd = mode === "docs"
+            ? "python backend/ingest.py"
+            : "python backend/ingest_spaces.py";
+          setNote("Knowledge base not ready. Run: " + cmd, true);
+        }
+      } catch (_) {
+        setStatus("error", "offline");
+        setNote("Server not reachable", true);
+      }
+    }
+
+    // Init
+    checkHealth();
+  </script>
+</body>
+</html>
