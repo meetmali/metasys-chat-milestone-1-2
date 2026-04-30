@@ -8,7 +8,7 @@ A RAG-based chatbot that wraps the Metasys REST API spec and live building space
 
 ### Milestone 1 — API Documentation Pipeline
 
-<img width="759" height="791" alt="Screenshot 2026-04-30 at 12 37 32 PM" src="https://github.com/user-attachments/assets/7a70f527-1aa9-48b2-ac16-d1b5f79217fb" />
+<img width="602" height="791" alt="Screenshot 2026-04-30 at 12 37 32 PM" src="https://github.com/user-attachments/assets/7a70f527-1aa9-48b2-ac16-d1b5f79217fb" />
 
 
 ### Milestone 2 — Building Spaces Pipeline
