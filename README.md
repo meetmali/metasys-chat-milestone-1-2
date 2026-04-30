@@ -164,5 +164,3 @@ http://localhost:8000
 
 
 ---
-
-*Built by Meet Mali — JCAIL Controls Track Intern — University of Illinois Urbana-Champaign*
