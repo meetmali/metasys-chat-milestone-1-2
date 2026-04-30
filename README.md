@@ -65,7 +65,7 @@ metasys-assistant/
 ### Prerequisites
 
 - Python 3.11 or higher
-- Node.js (for MRAM — Milestone 2 only)
+- Node.js (for MRAM - Milestone 2 only)
 - [Ollama](https://ollama.com/download) installed
 
 ### Step 1 — Pull the LLM model
@@ -98,7 +98,7 @@ pip install -r requirements.txt
 
 ### Milestone 1 — API Docs Chat
 
-**1. Run ingestion** (reads `data/openapi.json`, builds vector DB — run once):
+**1. Run ingestion** (reads `data/openapi.json`, builds vector DB - run once):
 
 ```bash
 python backend/ingest.py
