@@ -5,7 +5,7 @@ I’ve completed Milestones 1 and 2 of metasys-chat. Below is a concise overview
 ⸻
 
 Milestone 1 — Metasys REST API Q&A
-I built a chatbot that reads the Metasys REST API specification file (openapi.json) and answers questions about the API. It understands the API structure, including available endpoints, parameters, and usage, and works entirely from the specification without requiring a live server connection.
+I built a chatbot that reads the Metasys REST API specification file (openapi.json) and answers questions about the API. It understands the API structure, including available endpoints, parameters, and usage, and works entirely from the specification without requiring a live server connection. 
 
  A. Rest API Document related Questions:
 	•	What endpoints are available for working with spaces?
@@ -19,7 +19,7 @@ B. Generic Question:
 ⸻
 
 Milestone 2 — Spaces Data Q&A
-I then integrated the chatbot with the MRAM server to incorporate live building data. It now uses data from all 278 spaces in the Metasys system to answer questions about the building. I also tested it with an unrelated query to confirm it handles out-of-scope questions appropriately.
+I then integrated the chatbot with the MRAM server to incorporate live building data. It now uses data from all 278 spaces in the Metasys system to answer questions about the building. I also tested it with an unrelated query to confirm it handles out-of-scope questions appropriately. The system uses a locally hosted Mini LLM via Ollama to prevent data leakage.
 
  A. Spaces related Questions:
 	•	What rooms are larger than 300 square meters?
