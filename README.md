@@ -6,12 +6,12 @@ A RAG-based chatbot that wraps the Metasys REST API spec and live building space
 
 ## Architecture
 
-### Milestone 1 — API Documentation Pipeline
+### Milestone 1: API Documentation Pipeline
 
 <img width="602" height="650" alt="Screenshot 2026-04-30 at 12 37 32 PM" src="https://github.com/user-attachments/assets/7a70f527-1aa9-48b2-ac16-d1b5f79217fb" />
 
 
-### Milestone 2 — Building Spaces Pipeline
+### Milestone 2: Building Spaces Pipeline
 
 <img width="602" height="883" alt="Screenshot 2026-04-30 at 12 38 17 PM" src="https://github.com/user-attachments/assets/1c7751a8-dd2b-48ea-95b9-6941825cb7ee" />
 
@@ -96,7 +96,7 @@ pip install -r requirements.txt
 
 ## Running the Project
 
-### Milestone 1 — API Docs Chat
+### Milestone 1: API Docs Chat
 
 **1. Run ingestion** (reads `data/openapi.json`, builds vector DB - run once):
 
@@ -120,7 +120,7 @@ Click the **API Docs** tab. The green dot confirms the knowledge base is ready.
 
 ---
 
-### Milestone 2 — Building Spaces Chat
+### Milestone 2: Building Spaces Chat
 
 **1. Start MRAM** (in a separate terminal):
 
