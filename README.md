@@ -8,122 +8,20 @@ A RAG-based chatbot that wraps the Metasys REST API spec and live building space
 
 ### Milestone 1 — API Documentation Pipeline
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│ INGESTION  (run once)                                               │
-│                                                                     │
-│  openapi.json  ──►  Parse 59 endpoints  ──►  Embed chunks          │
-│  (on disk)          into 60 text chunks      (all-MiniLM-L6-v2)    │
-│                                                   │                 │
-│                                                   ▼                 │
-│                                          ChromaDB (metasys_api)     │
-└─────────────────────────────────────────────────────────────────────┘
+<img width="759" height="791" alt="Screenshot 2026-04-30 at 12 37 32 PM" src="https://github.com/user-attachments/assets/7a70f527-1aa9-48b2-ac16-d1b5f79217fb" />
 
-┌─────────────────────────────────────────────────────────────────────┐
-│ CHAT  (per message)                                                 │
-│                                                                     │
-│  User question                                                      │
-│      │                                                              │
-│      ▼                                                              │
-│  Embed question  ──►  Vector search  ──►  Top 5 chunks             │
-│  (all-MiniLM)         (cosine similarity)      │                    │
-│                                                ▼                    │
-│                                       Build system prompt          │
-│                                       (question + context)         │
-│                                                │                    │
-│                                                ▼                    │
-│                                       Ollama (llama3.2:3b)         │
-│                                       running locally              │
-│                                                │                    │
-│                                                ▼                    │
-│                                       Stream response to UI        │
-└─────────────────────────────────────────────────────────────────────┘
-```
 
 ### Milestone 2 — Building Spaces Pipeline
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│ INGESTION  (run once, requires MRAM)                                │
-│                                                                     │
-│  MRAM :4242                                                         │
-│      │                                                              │
-│      ▼                                                              │
-│  GET /api/v6/spaces  ──►  278 space IDs                            │
-│                                │                                    │
-│                                ▼                                    │
-│  GET /api/v6/spaces/{id}  ──►  Rich data per space:                │
-│  (278 requests)               name, type, area, description,       │
-│                               location hierarchy, equipment        │
-│                                │                                    │
-│                                ▼                                    │
-│  Build 1 text chunk per space  ──►  Embed chunks                   │
-│                                      (all-MiniLM-L6-v2)            │
-│                                           │                         │
-│                                           ▼                         │
-│                                  ChromaDB (metasys_spaces)         │
-└─────────────────────────────────────────────────────────────────────┘
+<img width="602" height="883" alt="Screenshot 2026-04-30 at 12 38 17 PM" src="https://github.com/user-attachments/assets/1c7751a8-dd2b-48ea-95b9-6941825cb7ee" />
 
-┌─────────────────────────────────────────────────────────────────────┐
-│ CHAT  (per message)                                                 │
-│                                                                     │
-│  User question                                                      │
-│      │                                                              │
-│      ▼                                                              │
-│  Embed question  ──►  Vector search  ──►  Top 15 space chunks      │
-│  (all-MiniLM)         (cosine similarity)      │                    │
-│                                                ▼                    │
-│                                       Build system prompt          │
-│                                       (question + context)         │
-│                                                │                    │
-│                                                ▼                    │
-│                                       Ollama (llama3.2:3b)         │
-│                                       running locally              │
-│                                                │                    │
-│                                                ▼                    │
-│                                       Stream response to UI        │
-└─────────────────────────────────────────────────────────────────────┘
-```
+
 
 ### Full System Infrastructure
 
-```
-                        metasys-assistant
-                              │
-              ┌───────────────┴───────────────┐
-              │                               │
-        Milestone 1                     Milestone 2
-        API Docs chat                  Spaces chat
-              │                               │
-        POST /chat                    POST /chat/spaces
-        POST /ingest                  POST /ingest/spaces
-              │                               │
-              └───────────┬───────────────────┘
-                          │
-                    FastAPI Server
-                    (localhost:8000)
-                          │
-              ┌───────────┼───────────┐
-              │           │           │
-         ChromaDB      Ollama    sentence-
-         (local)     (local LLM) transformers
-         data/          :11434   (embeddings)
-         chroma_db/
-              │
-    ┌─────────┴──────────┐
-    │                    │
-metasys_api        metasys_spaces
-(60 chunks)        (278 spaces)
-Milestone 1        Milestone 2
+<img width="597" height="865" alt="Screenshot 2026-04-30 at 12 38 49 PM" src="https://github.com/user-attachments/assets/5d0f8d7b-9f88-40ff-8ffb-1c257f144b8a" />
 
 
-                [Milestone 2 only]
-                MRAM Mock Server
-                localhost:4242
-                npx @cp-metasys/rest-api-mock
-```
-
----
 
 ## Tech Stack
 
@@ -138,19 +36,6 @@ Milestone 1        Milestone 2
 
 ---
 
-## Data Privacy
-
-> All LLM inference, embeddings, and vector search run entirely on your machine. No question, no document, no building data, and no response is ever sent to an external server or third-party API.
-
-| Component | How it stays local |
-|---|---|
-| LLM | Ollama runs the model on your hardware — no call to OpenAI, Anthropic, or any cloud service |
-| Embeddings | sentence-transformers runs on CPU after a one-time model download |
-| Vector DB | ChromaDB writes to `data/chroma_db/` on disk — never leaves the machine |
-| Building data | MRAM is a local mock server — no real Metasys system is exposed |
-| API keys | None required |
-
----
 
 ## Project Structure
 
@@ -189,8 +74,6 @@ metasys-assistant/
 ollama pull llama3.2:3b
 ```
 
-> First run downloads ~2GB. On a low-RAM machine try `ollama pull mistral:7b` as an alternative.
-
 ### Step 2 — Create virtual environment
 
 ```bash
@@ -219,14 +102,6 @@ pip install -r requirements.txt
 
 ```bash
 python backend/ingest.py
-```
-
-Expected output:
-```
-[ingest] Loading spec from data/openapi.json ...
-[ingest] Built 60 chunks from 52 paths
-[ingest] Embedding chunks ...
-[ingest] Done. 60 chunks stored in 'metasys_api'.
 ```
 
 **2. Start the server:**
@@ -262,16 +137,6 @@ MRAM serves mock building data at `http://localhost:4242`.
 python backend/ingest_spaces.py
 ```
 
-Expected output:
-```
-[ingest_spaces] Fetching all spaces from http://localhost:4242/api/v6/spaces ...
-[ingest_spaces] Got 278 spaces
-[ingest_spaces] Fetching details for 278 spaces ...
-[ingest_spaces] 50/278 fetched ...
-[ingest_spaces] 100/278 fetched ...
-[ingest_spaces] Done. 278 spaces stored in 'metasys_spaces'.
-```
-
 **3. Start the server:**
 
 ```bash
@@ -283,8 +148,6 @@ uvicorn backend.main:app --reload --port 8000
 ```
 http://localhost:8000
 ```
-
-Click the **Spaces** tab and try asking a question.
 
 ---
 
@@ -299,68 +162,6 @@ Click the **Spaces** tab and try asking a question.
 | `POST` | `/ingest/spaces` | M2: Fetch live MRAM data and re-ingest |
 | `GET` | `/health` | Readiness check for both ChromaDB collections |
 
----
-
-## Environment Variables
-
-Stored in `.env` at the project root:
-
-```env
-MRAM_URL=http://localhost:4242
-SPEC_PATH=data/openapi.json
-OLLAMA_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.2:3b
-CHROMA_PATH=data/chroma_db
-COLLECTION_NAME=metasys_api
-TOP_K=5
-EMBED_MODEL=all-MiniLM-L6-v2
-```
-
----
-
-## Example Questions
-
-### API Docs mode (Milestone 1)
-
-- What endpoints are available for working with spaces?
-- How does pagination work in the Metasys API?
-- How do I authenticate with the Metasys REST API?
-- What query parameters does `GET /objects` support?
-
-### Spaces mode (Milestone 2)
-
-- What rooms are larger than 300 square meters?
-- What buildings have a bedroom? Also provide their IDs.
-- Give me all the information about the building named Crystal Cave Dwelling.
-- List all buildings in the system.
-- What equipment is in the Kitchen?
-
----
-
-## Re-ingesting Data
-
-**M1** — Re-run if you update `openapi.json`, or click **Re-ingest** in the UI header.
-
-**M2** — Re-run any time you want fresh data from MRAM (e.g. after the mock data changes):
-
-```bash
-python backend/ingest_spaces.py
-```
-
-Or click **Re-ingest** while in Spaces mode in the UI.
-
----
-
-## Troubleshooting
-
-| Issue | Fix |
-|---|---|
-| `Knowledge base not ready` | Run `python backend/ingest.py` (M1) or `python backend/ingest_spaces.py` (M2) |
-| `Cannot reach Ollama` | Run `ollama serve` in a separate terminal |
-| `MRAM not reachable` | Run `npx @cp-metasys/rest-api-mock` in a separate terminal |
-| `SSL certificate error` during ingest | Add `HF_HUB_DISABLE_SSL_VERIFICATION=1` before running ingest |
-| `python not found` on Windows | Disable the Microsoft Store Python alias in App Execution Aliases settings |
-| Slow responses | Switch to `llama3.2:3b` in `.env` — faster than `llama3.1:8b` on CPU |
 
 ---
 
