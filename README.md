@@ -27,8 +27,8 @@ A RAG-based chatbot that wraps the Metasys REST API spec and live building space
 
 | Component | Technology | Why |
 |---|---|---|
-| LLM | [Ollama](https://ollama.com) — `llama3.2:3b` | Runs entirely on-device. No API keys, no external calls, no data leakage. |
-| Embeddings | `sentence-transformers` — `all-MiniLM-L6-v2` | Small (~90MB), fast on CPU, no GPU needed. Downloads once and runs offline. |
+| LLM | [Ollama](https://ollama.com) - `llama3.2:3b` | Runs entirely on-device. No API keys, no external calls, no data leakage. |
+| Embeddings | `sentence-transformers` - `all-MiniLM-L6-v2` | Small (~90MB), fast on CPU, no GPU needed. Downloads once and runs offline. |
 | Vector DB | [ChromaDB](https://www.trychroma.com) | Zero infrastructure — persists to a local folder. No server, no Docker. |
 | Backend | [FastAPI](https://fastapi.tiangolo.com) + Uvicorn | Async SSE streaming, serves the UI and all API routes from one process. |
 | Frontend | Vanilla HTML + JS | Single dark UI file, no build step, no framework. Streams tokens live. |
