@@ -1,0 +1,38 @@
+Hello Pete & Michael,
+
+I’ve completed Milestones 1 and 2 of metasys-chat. Below is a concise overview along with demo videos for each.
+
+⸻
+
+Milestone 1 — Metasys REST API Q&A
+I built a chatbot that reads the Metasys REST API specification file (openapi.json) and answers questions about the API. It understands the API structure, including available endpoints, parameters, and usage, and works entirely from the specification without requiring a live server connection.
+
+ A. Rest API Document related Questions:
+	•	What endpoints are available for working with spaces?
+	•	How does pagination work in the Metasys API?
+
+B. Generic Question:
+	•	What is Metasys?
+
+[Milestone 1 Demo Video]
+
+⸻
+
+Milestone 2 — Spaces Data Q&A
+I then integrated the chatbot with the MRAM server to incorporate live building data. It now uses data from all 278 spaces in the Metasys system to answer questions about the building. I also tested it with an unrelated query to confirm it handles out-of-scope questions appropriately.
+
+ A. Spaces related Questions:
+	•	What rooms are larger than 300 square meters?
+	•	What buildings have a bedroom? Include their IDs.
+	•	Provide all information related to the building named Crystal Cave Dwelling.
+
+ B. Out-of-scope Question:
+	•	What is the ranking of UIUC?
+
+[Milestone 2 Demo Video]
+
+⸻
+
+I’ve also pushed my work to the shared metasys-chat repository under the meet/metasys-assistant branch, including a README with setup instructions.
+
+I welcome any feedback or suggestions you may have.
