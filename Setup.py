@@ -23,3 +23,18 @@ git commit -m "feat: metasys-assistant Milestone 1 and Milestone 2"
 
 Step 7 — Push your branch
 git push -u origin meet/metasys-assistant
+
+
+powershellNew-Item .gitignore -ItemType File
+Then open it in VSCode and paste this content:
+.venv/
+data/chroma_db/
+__pycache__/
+*.pyc
+.env
+Save the file, then run:
+powershellgit rm -r --cached .venv
+git rm -r --cached data/chroma_db
+git add .gitignore
+git commit -m "fix: add .gitignore and remove large folders from tracking"
+git push origin meet/metasys-assistant --force
